@@ -1,0 +1,69 @@
+<?scenebuilder-stylesheet menustyle.css?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane fx:controller="game.engine.GameController"
+          xmlns:fx="http://javafx.com/fxml" alignment="BOTTOM_RIGHT" hgap="10" vgap="10">
+          <padding><Insets top="100" right="50" bottom="50" left="25"/></padding>
+
+    <Button fx:id ="buyTowerButton"
+            onAction = "#buyTower"
+            GridPane.rowIndex="0"
+            GridPane.columnIndex="0"
+            GridPane.rowSpan="4"
+            prefHeight="80"
+            prefWidth="80"
+            />
+    <Button fx:id = "openMenuButton"
+            onAction = "#openMenu"
+            GridPane.rowIndex="0"
+            GridPane.columnIndex="1"
+            GridPane.rowSpan="4"
+            prefHeight="80"
+            prefWidth="80"
+            />
+
+    <Label fx:id = "resourceLabel"
+           text = "Gold: "
+           GridPane.rowIndex="0"
+           GridPane.columnIndex="4"
+           />
+    <Label fx:id = "levelLabel"
+           text = "Wave: "
+           GridPane.rowIndex="1"
+           GridPane.columnIndex="4"
+           />
+    <Label fx:id = "livesLabel"
+           text = "Lives: "
+           GridPane.rowIndex="3"
+           GridPane.columnIndex="4"
+           />
+    <Label fx:id = "scoreLabel"
+           text = "Score: "
+           GridPane.rowIndex="2"
+           GridPane.columnIndex="4"
+            />
+    <Label fx:id = "currentResources"
+              GridPane.rowIndex="0"
+              GridPane.columnIndex="5"
+              />
+    <Label fx:id = "currentLevel"
+              GridPane.rowIndex="1"
+              GridPane.columnIndex="5"
+              />
+    <Label fx:id = "currentScore"
+              GridPane.rowIndex="2"
+              GridPane.columnIndex="5"
+              />
+    <Label fx:id = "currentLives"
+           GridPane.rowIndex="3"
+           GridPane.columnIndex="5"
+            />
+    <Label fx:id = "timeLabel"
+           GridPane.rowIndex="0"
+           GridPane.columnIndex="6"
+           GridPane.columnSpan="2"
+           GridPane.rowSpan="2"
+           />
+</GridPane>

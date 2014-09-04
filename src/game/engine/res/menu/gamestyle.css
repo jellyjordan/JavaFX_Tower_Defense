@@ -1,0 +1,18 @@
+.root {
+}
+
+#buyTowerButton {
+    -fx-background-image: url('icon/BUY_ICON.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+#openMenuButton{
+    -fx-background-image: url('icon/MENU_ICON.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+#timeLabel{
+    -fx-font-size: 20;
+}

@@ -1,0 +1,57 @@
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+<?scenebuilder-stylesheet menustyle.css?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<GridPane fx:controller="game.MainMenuController"
+          xmlns:fx="http://javafx.com/fxml" alignment="TOP_LEFT" hgap="10" vgap="10">
+          <padding><Insets top="100" right="50" bottom="10" left="25"/></padding>
+
+    <Label
+            fx:id="tdlabel"
+            GridPane.columnIndex="1"
+            GridPane.rowIndex="1"
+            alignment="TOP_CENTER"
+            text="Tower Defense"
+            />
+    <VBox GridPane.columnIndex="1"
+          GridPane.rowIndex="5"
+          spacing="10"
+          alignment="CENTER_LEFT">
+        <Button
+            fx:id = "newGameButton"
+            onAction="#startNewGame"
+            text = "New Game"
+            prefWidth="120"
+            prefHeight="35"
+            />
+        <Button
+            fx:id = "loadGameButton"
+            text = "Load Game"
+            prefWidth="120"
+            prefHeight="35"
+            />
+        <Button
+            fx:id = "leaderboardButton"
+            text = "Leaderboard"
+            prefWidth="120"
+            prefHeight="35"
+            />
+        <Button
+            fx:id = "optionsButton"
+            text = "Options"
+            prefWidth="120"
+            prefHeight="35"
+            />
+        <Button
+            fx:id = "exitButton"
+            onAction="#exitGame"
+            text = "Exit"
+            prefWidth="120"
+            prefHeight="35"
+            />
+
+    </VBox>
+</GridPane>

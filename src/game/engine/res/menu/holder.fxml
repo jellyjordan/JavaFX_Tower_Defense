@@ -1,0 +1,8 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="200.0" prefWidth="300.0" xmlns:fx="http://javafx.com/fxml" fx:controller="game.MainController">
+    <children>
+        <StackPane fx:id="vistaHolder" VBox.vgrow="ALWAYS" />
+    </children>
+</VBox>
