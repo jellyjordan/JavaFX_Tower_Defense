@@ -128,31 +128,6 @@ public class GameManager {
         );
     }
 
-    //creates an attack animation when the tower makes an attack.
-    //called by TowerAttackerService
-    public PathTransition createAttackAnimation(int towerX , int towerY , int monsterX , int monsterY){
-
-        Path projectilePath = new Path();
-        projectilePath.getElements().add(new MoveTo(towerX , towerY));
-        projectilePath.getElements().add(new LineTo(monsterX , monsterY));
-
-        PathTransition pathTransition = new PathTransition(Duration.millis(500) , projectilePath , new Circle(0 , 0 , 5 , Color.BLACK));
-
-        animationQueue.add(pathTransition);
-        return null;
-    }
-
-    /*
-        plays any animations and queue and removes them upon completion
-     */
-    private void playAttackAnimations(){
-        if(!animationQueue.isEmpty()){
-            for(PathTransition pathTransition : animationQueue){
-                monsterLayer.getChildren().add(pathTransition.getNode());
-                pathTransition.play();
-            }//end for - play animation
-        }//end if - is not empty
-    }
 
     /*
         Checks monsters for killSwitch than removes them and
@@ -201,8 +176,6 @@ public class GameManager {
                 }//end if - second passed
                 removeMonsters();
                 updateLocations((int)(1));
-               // playAttackAnimations();
-              //  updateAttackAnimations();
                 lastUpdateTime.set(timestamp / 1000000000);
                 updateLabels(timer);
             }//end handle

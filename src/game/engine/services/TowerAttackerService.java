@@ -1,15 +1,29 @@
 package game.engine.services;
 
+import game.MenuNavigator;
+import game.engine.GameController;
 import game.engine.GameManager;
 import game.engine.GameState;
 import game.engine.characters.Monster;
 import game.engine.characters.Tower;
+import javafx.animation.PathTransition;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
+import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.Iterator;
 
-
+/*
+    One service runs for each tower in play. The loop scans all
+    monsters alive and reduces their health if they are within range
+ */
 public class TowerAttackerService extends Service<Void> {
     Tower tower;
 
@@ -34,9 +48,8 @@ public class TowerAttackerService extends Service<Void> {
                                 & monster.getX() < towerMaxXRange
                                 & monster.getY() > towerMinYRange
                                 & monster.getY() < towerMaxYRange) {
-                            System.out.println("BANG");
-                            //GameManager.createAttackAnimation(tower.getX() , tower.getY() , monster.getX() , monster.getY());
                             monster.takeDamage(tower.getAttackDamage());
+                            tower.createProjectile(monster.getX() , monster.getY());
                             try{
                                 Thread.sleep((long) (tower.getAttackSpeed() * 1000));
                             } catch(InterruptedException ex){ex.printStackTrace();}
