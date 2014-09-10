@@ -3,6 +3,7 @@ package game.engine;
 
 import game.MenuNavigator;
 import game.engine.characters.Monster;
+import game.engine.characters.Projectile;
 import game.engine.characters.Tower;
 import javafx.animation.AnimationTimer;
 import javafx.animation.PathTransition;
@@ -40,15 +41,14 @@ public class GameManager {
     private  Group monsterLayer;                   //add and remove monsters from the map
     private  GameState game;                       //access game data
     private  Scene gameScene;                      //used by controller
-    private  ArrayList<PathTransition> animationQueue;
     private  ArrayList<Monster> monsterRemovalQueue;
+    private  ArrayList<Projectile> animationQueue;
     private  GameController gameController;
 
     //Exception thrown in fxml file not found
     public void initialize() throws java.io.IOException{
         //initialize globals
         game = GameState.getNewGame();
-        animationQueue = new ArrayList<PathTransition>();
         gameMap = new TileMap(1280 ,800);
         monsterLayer = new Group();
 
@@ -71,6 +71,7 @@ public class GameManager {
         MenuNavigator.stage.setScene(gameScene);
         Monster.setPath(gameMap.getPath());
         monsterRemovalQueue = new ArrayList<Monster>();
+        animationQueue = new ArrayList<Projectile>();
         startGameLoop();
     }
 
@@ -115,6 +116,25 @@ public class GameManager {
             }//end for checked monsters
         }//end if- monsters populated
     }//end method - update locations
+
+    //gets projectile data from Tower and transfers it to Manager for gui actions
+    private void getProjectiles(){
+        for(Tower tower : game.getPlayerTowers()){
+            for(Projectile projectile : tower.getProjectileList()){
+                animationQueue.add(projectile);
+                monsterLayer.getChildren().add(projectile);
+            }
+            tower.getProjectileList().clear();
+        }
+
+    }
+
+    //updates the projectiles location from the tower to the monster
+    private void updateProjectiles(){
+        for(Projectile projectile : animationQueue){
+            projectile.updatePath();
+        }
+    }
 
     //updates FXML labels
     private void updateLabels(int timer){
@@ -175,7 +195,9 @@ public class GameManager {
                     }//end if - 30 second wave timer
                 }//end if - second passed
                 removeMonsters();
-                updateLocations((int)(1));
+                updateLocations((1));
+                getProjectiles();
+                updateProjectiles();
                 lastUpdateTime.set(timestamp / 1000000000);
                 updateLabels(timer);
             }//end handle

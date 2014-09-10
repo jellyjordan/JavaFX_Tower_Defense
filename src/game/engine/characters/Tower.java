@@ -3,6 +3,7 @@ package game.engine.characters;
 
 import game.engine.Coordinate;
 import game.engine.services.TowerAttackerService;
+import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
@@ -30,6 +31,8 @@ public class Tower {
         attackRange = 200;
         towerAttacker = new TowerAttackerService(this);
         towerAttacker.start();
+        sellCost = 35;
+        upgradeCost = 20;
     }
     public void upgradeTower(int userGold){
         attackDamage++;
@@ -38,9 +41,11 @@ public class Tower {
     }
 
     public void createProjectile(int endX , int endY){
-        projectileList.add(new Projectile(  endX
-                                           ,endY
-                                           ,Color.BLACK));
+        projectileList.add(new Projectile(   coords.getExactX()
+                                           , coords.getExactY()
+                                           , endX
+                                           , endY
+                                           , Color.BLACK));
     }
 
     public void sellTower(){
@@ -74,36 +79,4 @@ public class Tower {
         this.attackSpeed = attackSpeed;
     }
 
-    /*  Projectile used for graphic when a monster
-        is attacked by this tower
-    */
-    protected class Projectile extends Circle{
-
-        private final double movementX;   //determines speed and direction of projectile
-        private final double movementY;   //assume 30fps
-        private final int monsterX;
-        private boolean endofPath = false;
-
-        Projectile(int monsterX , int monsterY , Color color){
-            super(coords.getExactX() , coords.getExactY() , 5 , color);
-            this.monsterX = monsterX;
-
-            //if monster location > than tower coordinates we must move in positive direction
-            movementX = (monsterX - coords.getExactX()) / 100;
-            movementY = (monsterY - coords.getExactY()) / 100;
-
-        }
-
-        //moves projectile along path to monster which was hit.
-        public void updatePath(){
-            setCenterX(getCenterX() + movementX);
-            setCenterY(getCenterY() + movementY);
-
-            //signifies projectile has reached monster
-            if(getCenterX() - monsterX < 20 ){
-                endofPath = true;
-                this.setVisible(false);
-            }
-        }
-    }
 }

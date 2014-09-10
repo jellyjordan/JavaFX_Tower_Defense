@@ -50,7 +50,7 @@ public class TowerAttackerService extends Service<Void> {
                                 & monster.getY() < towerMaxYRange) {
                             monster.takeDamage(tower.getAttackDamage());
                             tower.createProjectile(monster.getX() , monster.getY());
-                            try{
+                            try{//thread sleeps if monster is hit
                                 Thread.sleep((long) (tower.getAttackSpeed() * 1000));
                             } catch(InterruptedException ex){ex.printStackTrace();}
                         }//end if - attacked monster

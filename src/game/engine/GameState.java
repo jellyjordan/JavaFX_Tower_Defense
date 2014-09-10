@@ -24,7 +24,7 @@ public class GameState implements Serializable{
 
     //CONSTRUCTORS
     private GameState(){
-        resources = 100;
+        resources = 10000;
         level = 0;
         score = 0;
         lives = 20;
