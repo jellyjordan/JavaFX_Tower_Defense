@@ -35,6 +35,7 @@ public class GameController {
         gameManager.getGameScene().setOnMouseClicked(new buyTower());
     }
     public void openMenu(){
+        gameManager.pauseGame();
         //open Game Menu
     }
     public void updateLabels(String currentLevel , String currentLives , String currentResources , String currentScore , String timeLabel){

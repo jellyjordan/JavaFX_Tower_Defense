@@ -63,6 +63,10 @@ public class Tower {
     public int getAttackDamage(){return  attackDamage; }
     public double getAttackSpeed(){return attackSpeed;}
 
+    public TowerAttackerService getTowerAttacker() {
+        return towerAttacker;
+    }
+
     public ArrayList<Projectile> getProjectileList() {
         return projectileList;
     }

@@ -44,6 +44,7 @@ public class GameManager {
     private  ArrayList<Monster> monsterRemovalQueue;
     private  ArrayList<Projectile> animationQueue;
     private  GameController gameController;
+    private  AnimationTimer gameLoop;
 
     //Exception thrown in fxml file not found
     public void initialize() throws java.io.IOException{
@@ -150,6 +151,39 @@ public class GameManager {
 
 
     /*
+        Method is called when the game is quit/loss
+        to display results and prepare to return to menu or
+        create a new game.
+     */
+    public void stopGame(){
+        pauseGame();
+        game.setState(GameState.IS_STOPPED);
+        gameLoop.stop();
+    }
+
+    /*
+        Method is called when the game is paused to control
+        background threads.
+     */
+    public void pauseGame(){
+        game.setState(GameState.IS_PAUSED);
+        for(Tower tower : game.getPlayerTowers()){
+            tower.getTowerAttacker().cancel();
+        }
+    }
+    /*
+        Method is called when game is running to control
+        background threads.
+     */
+    public void resumeGame(){
+        game.setState(GameState.IS_RUNNING);
+        for(Tower tower : game.getPlayerTowers()){
+            tower.getTowerAttacker().start();
+        }
+    }
+
+
+    /*
         Checks monsters for killSwitch than removes them and
         clears the deletion queue. Rewards or punishes player
         if the path was finished.
@@ -203,6 +237,7 @@ public class GameManager {
             }//end handle
 
         };
+        gameLoop = timer;
         timer.start();
     }
 

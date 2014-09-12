@@ -41,7 +41,7 @@ public class TowerAttackerService extends Service<Void> {
                 int towerMaxXRange = tower.getX() + tower.getAttackRange();
                 int towerMinYRange = tower.getY() - tower.getAttackRange();
                 int towerMaxYRange = tower.getY() + tower.getAttackRange();
-                while(GameState.getGame().getLives() > 0) {
+                while(GameState.getGame().getState() == GameState.IS_RUNNING) {
                     for (Iterator<Monster> iterator = GameState.getGame().getMonstersAlive().iterator(); iterator.hasNext(); ) {
                         Monster monster = iterator.next();
                         if (monster.getX() > towerMinXRange
@@ -52,10 +52,20 @@ public class TowerAttackerService extends Service<Void> {
                             tower.createProjectile(monster.getX() , monster.getY());
                             try{//thread sleeps if monster is hit
                                 Thread.sleep((long) (tower.getAttackSpeed() * 1000));
-                            } catch(InterruptedException ex){ex.printStackTrace();}
+                            } catch(InterruptedException ex){
+                                if(isCancelled()){
+                                    break;
+                                }
+                                else{
+                                ex.printStackTrace();
+                                }
+                            }
                         }//end if - attacked monster
-                        break;
                     }//end for - monster list
+                    //cancel is called on tower sell, upgrades or game pauses
+                    if(isCancelled()){
+                        break;
+                    }
                 }//end while - lives
                 return null;
             }//end Task method - call
