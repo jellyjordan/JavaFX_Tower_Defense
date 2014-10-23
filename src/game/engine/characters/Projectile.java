@@ -11,11 +11,13 @@ public class Projectile extends Circle {
     private final double movementX;   //determines speed and direction of projectile
     private final double movementY;   //assume 30fps
     private final int monsterX;
+    private final int monsterY;
     private boolean endofPath = false;
 
     Projectile(int towerX , int towerY ,int monsterX , int monsterY , Color color){
         super(towerX , towerY , 5 , color);
         this.monsterX = monsterX;
+        this.monsterY = monsterY;
 
         //if monster location > than tower coordinates we must move in positive direction
         movementX = (monsterX - towerX) / 80;
@@ -28,7 +30,7 @@ public class Projectile extends Circle {
         setCenterY(getCenterY() + movementY);
 
         //signifies projectile has reached monster
-        if(getCenterX() - monsterX <= 0 ){
+        if(getCenterX() - monsterX == 0  || getCenterY() - monsterY == 0){
             endofPath = true;
             this.setVisible(false);
         }

@@ -211,14 +211,16 @@ public class GameManager {
     }
 
     private void startGameLoop() {
-        final LongProperty lastUpdateTime = new SimpleLongProperty(0);
+        final LongProperty secondUpdate = new SimpleLongProperty(0);
+        final LongProperty fpstimer = new SimpleLongProperty(0);
         final AnimationTimer timer = new AnimationTimer() {
             int timer = 10;
 
             @Override
             public void handle(long timestamp) {
 
-                if (timestamp/ 1000000000 != lastUpdateTime.get()) {
+                //times each second
+                if (timestamp/ 1000000000 != secondUpdate.get()) {
                     timer--;
                     if(timer > 19) {
                         createMonster(3);
@@ -229,10 +231,13 @@ public class GameManager {
                     }//end if - 30 second wave timer
                 }//end if - second passed
                 removeMonsters();
-                updateLocations((1));
                 getProjectiles();
-                updateProjectiles();
-                lastUpdateTime.set(timestamp / 1000000000);
+                if(timestamp / 10000000 != fpstimer.get()){
+                    updateLocations((1));
+                    updateProjectiles();
+                }
+                fpstimer.set(timestamp / 10000000);
+                secondUpdate.set(timestamp / 1000000000);
                 updateLabels(timer);
             }//end handle
 
