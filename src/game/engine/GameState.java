@@ -91,6 +91,20 @@ public class GameState implements Serializable{
         return false;
     }
 
+    public boolean isRunning(){
+        if(state == IS_RUNNING){
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isStopped(){
+        if(state == IS_PAUSED){
+            return true;
+        }
+        return false;
+    }
+
     public ArrayList<Tower> getPlayerTowers(){
         return playerTowers;
     }
