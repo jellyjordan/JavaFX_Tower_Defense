@@ -61,8 +61,6 @@ public class TowerAttackerService {
                             & target.getX() < towerMaxXRange
                             & target.getY() > towerMinYRange
                             & target.getY() < towerMaxYRange) {
-                        System.out.println("Tower X:" + tower.getX() + "Tower Y: " + tower.getY());
-                        System.out.println("Mons X:" + target.getX() + "Monst Y: " + target.getY());
                         tower.createProjectile(target.getX() , target.getY());
                         target.takeDamage(tower.getAttackDamage());
                         break;
