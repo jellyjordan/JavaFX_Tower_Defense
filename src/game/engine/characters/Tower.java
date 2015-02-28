@@ -30,7 +30,7 @@ public class Tower {
         attackSpeed = 1.0;
         attackRange = 200;
         towerAttacker = new TowerAttackerService(this);
-        towerAttacker.start();
+        towerAttacker.pollTower();
         sellCost = 35;
         upgradeCost = 20;
     }
