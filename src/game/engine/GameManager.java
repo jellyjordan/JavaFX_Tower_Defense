@@ -9,22 +9,19 @@ import javafx.animation.AnimationTimer;
 import javafx.animation.PathTransition;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 
 //class used to delegate between game classes after game has been initialized
@@ -118,24 +115,40 @@ public class GameManager {
         }//end if- monsters populated
     }//end method - update locations
 
-    //gets projectile data from Tower and transfers it to Manager for gui actions
-    private void getProjectiles(){
+    /*
+        After attacks are made the projectile is created by the tower.
+        It is then transfered
+     */
+    private void createProjectiles(){
+        Path projectilePath;
+        PathTransition animation;
         for(Tower tower : game.getPlayerTowers()){
             for(Projectile projectile : tower.getProjectileList()){
-                animationQueue.add(projectile);
+                // Create animation path
+                projectilePath = new Path(new MoveTo(projectile.getStartX() , projectile.getStartY()));
+                projectilePath.getElements().add(new LineTo(projectile.getEndX() , projectile.getEndY()));
+                animation = new PathTransition(Duration.millis(400) , projectilePath , projectile);
+
+                // When the animation finishes, hide it and remove it
+                animation.setOnFinished(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent actionEvent) {
+                        PathTransition finishedAnimation = (PathTransition) actionEvent.getSource();
+                        Projectile finishedProjectile = (Projectile) finishedAnimation.getNode();
+
+                        // Hide and remove from gui
+                        finishedProjectile.setVisible(false);
+                        monsterLayer.getChildren().remove(finishedProjectile);
+                    }
+                });
                 monsterLayer.getChildren().add(projectile);
+                animation.play();
             }
             tower.getProjectileList().clear();
         }
 
     }
 
-    //updates the projectiles location from the tower to the monster
-    private void updateProjectiles(){
-        for(Projectile projectile : animationQueue){
-            projectile.updatePath();
-        }
-    }
 
     //updates FXML labels
     private void updateLabels(int timer){
@@ -167,9 +180,6 @@ public class GameManager {
      */
     public void pauseGame(){
         game.setState(GameState.IS_PAUSED);
-        for(Tower tower : game.getPlayerTowers()){
-            tower.getTowerAttacker().cancel();
-        }
     }
     /*
         Method is called when game is running to control
@@ -177,9 +187,6 @@ public class GameManager {
      */
     public void resumeGame(){
         game.setState(GameState.IS_RUNNING);
-        for(Tower tower : game.getPlayerTowers()){
-            tower.getTowerAttacker().start();
-        }
     }
 
 
@@ -231,10 +238,9 @@ public class GameManager {
                     }//end if - 30 second wave timer
                 }//end if - second passed
                 removeMonsters();
-                getProjectiles();
+                createProjectiles();
                 if(timestamp / 10000000 != fpstimer.get()){
                     updateLocations((1));
-                    updateProjectiles();
                 }
                 fpstimer.set(timestamp / 10000000);
                 secondUpdate.set(timestamp / 1000000000);

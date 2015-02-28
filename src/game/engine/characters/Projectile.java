@@ -3,37 +3,42 @@ package game.engine.characters;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
-/*  Projectile used for graphic when a monster
-    is attacked by this tower
+/*
+    Projectile is created when the tower attacks a monster. The GameManager
+    will create the animation using the start and end locations.
 */
 public class Projectile extends Circle {
 
-    private final double movementX;   //determines speed and direction of projectile
-    private final double movementY;   //assume 30fps
-    private final int monsterX;
-    private final int monsterY;
-    private boolean endofPath = false;
+    private final int startX;    // Starting location of the projectile
+    private final int startY;
+    private final int endX;         // Destination of projectile
+    private final int endY;
 
     Projectile(int towerX , int towerY ,int monsterX , int monsterY , Color color){
         super(towerX , towerY , 5 , color);
-        this.monsterX = monsterX;
-        this.monsterY = monsterY;
-
-        //if monster location > than tower coordinates we must move in positive direction
-        movementX = (monsterX - towerX) / 80;
-        movementY = (monsterY - towerY) / 80;
+        startX = towerX;
+        startY = towerY;
+        endX = monsterX;
+        endY = monsterY;
     }
 
-    //moves projectile along path to monster which was hit.
-    public void updatePath(){
-        setCenterX(getCenterX() + movementX);
-        setCenterY(getCenterY() + movementY);
-
-        //signifies projectile has reached monster
-        if(getCenterX() - monsterX == 0  || getCenterY() - monsterY == 0){
-            endofPath = true;
-            this.setVisible(false);
-        }
+    public int getEndX(){
+        return endX;
     }
+
+    public int getEndY(){
+        return endY;
+    }
+
+    public int getStartX(){
+        return startX;
+    }
+
+    public int getStartY(){
+        return startY;
+    }
+
+
+
 }
 
