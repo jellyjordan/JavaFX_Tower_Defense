@@ -19,57 +19,66 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /*
-    One service runs for each tower in play. The loop scans all
-    monsters alive and reduces their health if they are within range
+    Service class is reponsible for usering monster and tower locations to deterimine
+    if an attack can be made. The scheduler will poll every second
  */
-public class TowerAttackerService extends Service<Void> {
-    Tower tower;
+public class TowerAttackerService {
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> pollHandler;
+    private Tower tower;
+    private Monster target;
 
     public TowerAttackerService(Tower tower){
         this.tower = tower;
     }
 
-    @Override
-    protected Task<Void> createTask(){
-        return new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
 
+    public void pollTower(){
+        final Runnable task = new Runnable() {
+            @Override
+            public void run() {
                 int towerMinXRange = tower.getX() - tower.getAttackRange();
                 int towerMaxXRange = tower.getX() + tower.getAttackRange();
                 int towerMinYRange = tower.getY() - tower.getAttackRange();
                 int towerMaxYRange = tower.getY() + tower.getAttackRange();
-                while(GameState.getGame().getState() == GameState.IS_RUNNING) {
-                    for (Iterator<Monster> iterator = GameState.getGame().getMonstersAlive().iterator(); iterator.hasNext(); ) {
-                        Monster monster = iterator.next();
-                        if (monster.getX() > towerMinXRange
-                                & monster.getX() < towerMaxXRange
-                                & monster.getY() > towerMinYRange
-                                & monster.getY() < towerMaxYRange) {
-                            tower.createProjectile(monster.getX() , monster.getY());
-                            monster.takeDamage(tower.getAttackDamage());
-                            try{//thread sleeps if monster is hit
-                                Thread.sleep((long) (tower.getAttackSpeed() * 1000));
-                            } catch(InterruptedException ex){
-                                if(isCancelled()){
-                                    break;
-                                }
-                                else{
-                                ex.printStackTrace();
-                                }
-                            }
-                        }//end if - attacked monster
-                    }//end for - monster list
-                    //cancel is called on tower sell, upgrades or game pauses
-                    if(isCancelled()){
-                        break;
-                    }
-                }//end while - lives
-                return null;
-            }//end Task method - call
+                Iterator<Monster> iterator = GameState.getGame().getMonstersAlive().iterator();
 
-        };
+                /*
+                    Polls monsters for location and attack if they are in range of the tower
+                    After an attack is made the runnable will return and be scheduled after 1
+                    second
+                  */
+                while (iterator.hasNext()) {
+                    target = iterator.next();
+                    // Breaks after an attack to prioritize the first monster
+                    if (target.getX() > towerMinXRange
+                            & target.getX() < towerMaxXRange
+                            & target.getY() > towerMinYRange
+                            & target.getY() < towerMaxYRange) {
+                        System.out.println("Tower X:" + tower.getX() + "Tower Y: " + tower.getY());
+                        System.out.println("Mons X:" + target.getX() + "Monst Y: " + target.getY());
+                        tower.createProjectile(target.getX() , target.getY());
+                        target.takeDamage(tower.getAttackDamage());
+                        break;
+                    }//end if - attacked monster
+                }//end for - monster list
+
+            }//end Task method - call
+        };//end class runnable
+
+         pollHandler = scheduler.scheduleWithFixedDelay(task , 0 , 1000 , TimeUnit.MILLISECONDS);
     }//end method - createTask
+
+    /*
+        Cancels the service for when the tower is upgraded or game is paused
+     */
+    public void cancel(){
+        pollHandler.cancel(true);
+    }
 }//end service class - TowerAttackerService
