@@ -24,9 +24,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-/*
-    Service class is reponsible for usering monster and tower locations to deterimine
-    if an attack can be made. The scheduler will poll every second
+/**
+ * Service class is responsible for polling monsters to determine
+ * which are in the tower's attack range. Once in range the tower
+ * can commit to an attack.
  */
 public class TowerAttackerService {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -39,6 +40,11 @@ public class TowerAttackerService {
     }
 
 
+    /**
+     * Iterates through the monster list to find a target. Once one is found
+     * a projectile is created which is used by the main gui thread to create
+     * an animation.
+     */
     public void pollTower(){
         final Runnable task = new Runnable() {
             @Override
@@ -61,15 +67,13 @@ public class TowerAttackerService {
                             & target.getX() < towerMaxXRange
                             & target.getY() > towerMinYRange
                             & target.getY() < towerMaxYRange) {
-                        tower.createProjectile(target.getX() , target.getY());
+                        tower.createProjectile(target);
                         target.takeDamage(tower.getAttackDamage());
                         break;
-                    }//end if - attacked monster
-                }//end for - monster list
-
+                    }
+                }
             }//end Task method - call
         };//end class runnable
-
          pollHandler = scheduler.scheduleWithFixedDelay(task , 0 , 1000 , TimeUnit.MILLISECONDS);
     }//end method - createTask
 
