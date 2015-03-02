@@ -9,20 +9,33 @@ import javafx.scene.shape.Circle;
 
 import java.util.ArrayList;
 
-/*  represents the towers physical properties in the game
-    must be constructed with coordinates
+/**
+ * Towers are used by the player as the primary weapon
+ * to defeat monsters.
+ *
+ * Each tower spawns a worker thread to poll for nearby monsters
+ * to make attacks on.
  */
 public class Tower {
-    private int attackDamage;
-    private double attackSpeed;     //sleeps the thread after an attack is made
-    private int attackRange;        //range value equals the distance the monster can be on the coordinate plane
-    private int upgradeCost;        //upgrading changes projectile color
-    private int sellCost;
-    private ArrayList<Projectile> projectileList;   //holds the towers projectiles for animating when attack is made
-    private Coordinate coords;                      //holds tile location and exact location on x/y axis
-    private TowerAttackerService towerAttacker;     //polls game monsters to see if they are in tower's attackRange
+    private int attackDamage;                       // Determines amount of health to reduce from monsters per attack
+    private double attackSpeed;                     // Determines the time a tower must wait after an attack
+    private int attackRange;                        // Sets the minimum range the tower can make attacks in
+    private int upgradeCost;                        // Determines the resource cost to upgrade the tower
+    private int sellCost;                           // Determines the resources gained by selling the tower
+    private ArrayList<Projectile> projectileList;   // Used by the gui thread to create animations for attacks
+    private Coordinate coords;                      // Represents the coordinates of the tower on the map
+    private TowerAttackerService towerAttacker;     // A worker thread for polling monster locations used for attacks
 
 
+    /**
+     * All towers are created with basic stats which are scaled with
+     * upgrades.
+     *
+     * @param x
+     * The x location on the map where the tower is placed.
+     * @param y
+     * The y location on the map where the tower is placed.
+     */
     public Tower(int x , int y){
         projectileList = new ArrayList<Projectile>();
         coords = new Coordinate(x , y);
@@ -34,34 +47,54 @@ public class Tower {
         sellCost = 35;
         upgradeCost = 20;
     }
-    public void upgradeTower(int userGold){
+
+    /**
+     * Upgrades the towers stats.
+     */
+    public void upgradeTower(){
         attackDamage++;
         attackSpeed = attackSpeed - 0.1;
         attackRange = attackRange + 50;
     }
 
-    public void createProjectile(int endX , int endY){
-        projectileList.add(new Projectile(   coords.getExactX()
-                                           , coords.getExactY()
-                                           , endX
-                                           , endY
-                                           , Color.BLACK));
+    /**
+     * Creates a projectile when the tower attacks a monster.
+     *
+     * @param target
+     * The target location of the projectile
+     */
+    public void createProjectile(Monster target){
+        projectileList.add(new Projectile(target , coords.getExactX() , coords.getExactY() , Color.BLACK));
     }
 
-    public void sellTower(){
 
-    }
     public int getX(){
         return coords.getExactX();
     }
+
     public int getY(){
         return coords.getExactY();
     }
+
     public int getAttackRange(){
         return attackRange;
     }
-    public int getAttackDamage(){return  attackDamage; }
-    public double getAttackSpeed(){return attackSpeed;}
+
+    public int getAttackDamage(){
+        return  attackDamage;
+    }
+
+    public double getAttackSpeed(){
+        return attackSpeed;
+    }
+
+    public int getUpgradeCost(){
+        return upgradeCost;
+    }
+
+    public int getSellCost(){
+        return sellCost;
+    }
 
     public TowerAttackerService getTowerAttacker() {
         return towerAttacker;
