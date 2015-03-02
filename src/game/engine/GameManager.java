@@ -22,43 +22,43 @@ import javafx.scene.shape.Path;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
-
-//class used to delegate between game classes after game has been initialized
-/*  class is used when user starts or loads a new game from the game.MainMenuController
-    responsible for generating map array and parsing the array to paint the map onto
-    stack pane
-
-    starts threads for:
-        spawning monster
-        tower attack
+/**
+ * Responsible for all communications between user interface and underlying
+ * frameworks. The initialize method starts the game loop when called through
+ * creating or loading a game.
  */
 public class GameManager {
-    private  TileMap gameMap;                      //updating tiles upon buying tower
-    private  Group monsterLayer;                   //add and remove monsters from the map
-    private  GameState game;                       //access game data
-    private  Scene gameScene;                      //used by controller
-    private  ArrayList<Monster> monsterRemovalQueue;
-    private  ArrayList<Projectile> animationQueue;
-    private  GameController gameController;
-    private  AnimationTimer gameLoop;
+    private  TileMap gameMap;                       // The painted map used as the backgrounds layer
+    private  Group monsterLayer;                    // Used for the monster graphics
+    private  GameState game;                        // Provides basic game states.
+    private  Scene gameScene;                       // The main viewport
+    private  GameController gameController;         // Handles fxml attributes (buttons and labels)
+    private  AnimationTimer gameLoop;               // Used for the gui thread
 
-    //Exception thrown in fxml file not found
+    /**
+     * Initializes the game
+     *
+     * @throws java.io.IOException
+     */
     public void initialize() throws java.io.IOException{
-        //initialize globals
+        // Initializes the game state
         game = GameState.getNewGame();
-        gameMap = new TileMap(1280 ,800);
-        monsterLayer = new Group();
 
-        //creates gui hierarchy
+        // Generates the map with the given resolution
+        gameMap = new TileMap(1280 ,800);
+
+        // Creates gui hierarchy
         FXMLLoader loader = new FXMLLoader(MenuNavigator.GAMEUI);
         StackPane gamePane = new StackPane();
         Group tilemapGroup = new Group();
+        monsterLayer = new Group();
         monsterLayer.getChildren().add(tilemapGroup);
         tilemapGroup.getChildren().add(gameMap);
         gamePane.getChildren().add(monsterLayer);
 
-        //opens stream to get controller reference
+        // Opens stream to get controller reference
         Node gameUI = (Node)loader.load(MenuNavigator.GAMEUI.openStream());
         gamePane.getChildren().add(gameUI);
         gameScene = new Scene(gamePane);
@@ -68,8 +68,6 @@ public class GameManager {
 
         MenuNavigator.stage.setScene(gameScene);
         Monster.setPath(gameMap.getPath());
-        monsterRemovalQueue = new ArrayList<Monster>();
-        animationQueue = new ArrayList<Projectile>();
         startGameLoop();
     }
 
@@ -78,46 +76,65 @@ public class GameManager {
     }
 
 
-
-    /*verifies the node is open and the user has resources
-      called by GameController when user clicks buyTower button
-    */
+    /**
+     * Attempts to create a tower at the tile clicked on
+     * by the user.
+     *
+     * @param xCords
+     * The clicked x coordinate
+     * @param yCords
+     * The clicked y coordinate
+     */
     public void buyTower(double xCords , double yCords){
-        //converts the mouse click coordinates to tile format
+        // Convert the clicked coordinates to a tile coordinate
         int xTile = (int)(xCords / 64);
         int yTile = (int)(yCords / 64);
 
-        //node and resource check before tile update
+        // Verify the node is not occupied
         if(gameMap.nodeOpen(xTile,yTile)){
+            // Verify the user can afford the tower
             if(game.getResources() > 49) {
                 game.addTower(new Tower(xTile, yTile));
                 game.setResources(game.getResources() - 50);
                 gameMap.setMapNode(((int) (xCords / 64)), ((int) (yCords / 64)), 7);
-            }//end if - has resources
-        }//end if - is node open
-    }//end method buyTower
+            }
+        }
+    }
 
 
-
+    /**
+     * Creates a monster.
+     *
+     * @param health
+     * The health points for the monster. Increases as
+     * the game progresses.
+     */
     private void createMonster(int health){
         game.getMonstersAlive().add(new Monster(health));
         monsterLayer.getChildren().add(game.getMonstersAlive().get(game.getMonstersAlive().size() - 1).getView());
-    }//end method - createMonster
+    }
 
-    /*
-        Updates each monsters location along the path
+    /**
+     * Updates monsters location on the path and removes any
+     * monsters which reach the end of the path.
      */
-    private void updateLocations(int timestamp){
+    private void updateLocations(){
         if(!game.getMonstersAlive().isEmpty()){
-            for (Monster monster : game.getMonstersAlive()) {
+            Iterator<Monster> monsters = game.getMonstersAlive().iterator();
+            Monster monster;
+            while(monsters.hasNext()) {
+                monster = monsters.next();
                 monster.updateLocation(1);
-            }//end for checked monsters
-        }//end if- monsters populated
-    }//end method - update locations
+                if(monster.isPathFinished()){
+                    removeMonster(monster);
+                }
+            }
+        }
+    }
 
-    /*
-        After attacks are made the projectile is created by the tower.
-        It is then transfered
+    /**
+     * Checks all towers for created projectiles which are then created
+     * and animated by the main game loop.
      */
     private void createProjectiles(){
         Path projectilePath;
@@ -127,7 +144,7 @@ public class GameManager {
                 // Create animation path
                 projectilePath = new Path(new MoveTo(projectile.getStartX() , projectile.getStartY()));
                 projectilePath.getElements().add(new LineTo(projectile.getEndX() , projectile.getEndY()));
-                animation = new PathTransition(Duration.millis(400) , projectilePath , projectile);
+                animation = new PathTransition(Duration.millis(300) , projectilePath , projectile);
 
                 // When the animation finishes, hide it and remove it
                 animation.setOnFinished(new EventHandler<ActionEvent>() {
@@ -139,6 +156,11 @@ public class GameManager {
                         // Hide and remove from gui
                         finishedProjectile.setVisible(false);
                         monsterLayer.getChildren().remove(finishedProjectile);
+
+                        // Remove monster if they are dead
+                        if(finishedProjectile.getTarget().isDead()){
+                            removeMonster(finishedProjectile.getTarget());
+                        }
                     }
                 });
                 monsterLayer.getChildren().add(projectile);
@@ -150,9 +172,13 @@ public class GameManager {
     }
 
 
-    //updates FXML labels
+    /**
+     * Updates the labels associated with the game state
+     *
+     * @param timer
+     * Time before the next wave of monsters will be spawned.
+     */
     private void updateLabels(int timer){
-        //labels must be updated through controller or reference must be passed in initialize
             gameController.updateLabels(
                 Integer.toString(game.getLevel()) ,
                 Integer.toString(game.getLives()) ,
@@ -163,10 +189,9 @@ public class GameManager {
     }
 
 
-    /*
-        Method is called when the game is quit/loss
-        to display results and prepare to return to menu or
-        create a new game.
+    /**
+     * Stops the game. Used when the player chooses to quit
+     * or the losing conditions are met.
      */
     public void stopGame(){
         pauseGame();
@@ -174,49 +199,53 @@ public class GameManager {
         gameLoop.stop();
     }
 
-    /*
-        Method is called when the game is paused to control
-        background threads.
+    /**
+     * Used to freeze the game and is called before the
+     * game is stopped.
      */
     public void pauseGame(){
         game.setState(GameState.IS_PAUSED);
     }
-    /*
-        Method is called when game is running to control
-        background threads.
+    /**
+     * Called when the game is started or the
+     * game returns from a paused state.
      */
     public void resumeGame(){
         game.setState(GameState.IS_RUNNING);
     }
 
 
-    /*
-        Checks monsters for killSwitch than removes them and
-        clears the deletion queue. Rewards or punishes player
-        if the path was finished.
+    /**
+     * Removes a monster from the graphical interface and from the reference
+     * list. The player is rewarded if they defeated the monster or punished
+     * if the monster finished the path.
+     *
+     * @param monster
+     * The monster to remove from the game.
      */
-    private synchronized void removeMonsters(){
-        for (Monster monster : game.getMonstersAlive()){
-            if (monster.killSwitch){
-                monsterRemovalQueue.add(monster);
-                if (monster.pathFinished){
-                    game.setLives((game.getLives()) - 1);
-                }// end if - monster finished path/remove life
-                else{
-                    game.setResources((game.getResources()) + monster.getReward());
-                    game.setScore(game.getScore() + (monster.getReward() * game.getLevel()));
-                }//end else - monster slain/ give reward
-            }//end if - dead monster
-        }//end for - add monster to removal queue
-        for (Monster monster : monsterRemovalQueue) {
-            if (monster.killSwitch) {
-                monster.getView().setVisible(false);
-                game.getMonstersAlive().remove(monster);
-            }
+    private synchronized void removeMonster(Monster monster){
+        // Punish player
+        if (monster.isPathFinished()){
+            game.setLives((game.getLives()) - 1);
         }
-        monsterRemovalQueue.clear();
+        // Reward player
+        else{
+            game.setResources((game.getResources()) + monster.getReward());
+            game.setScore(game.getScore() + (monster.getReward() * game.getLevel()));
+        }
+
+        // Remove monsters graphic and reference
+        monster.getView().setVisible(false);
+        game.getMonstersAlive().remove(monster);
+
     }
 
+    /**
+     * GAME LOOP
+     *
+     * Responsible for all graphical updates, including playing
+     * animations and updating monster locations.
+     */
     private void startGameLoop() {
         final LongProperty secondUpdate = new SimpleLongProperty(0);
         final LongProperty fpstimer = new SimpleLongProperty(0);
@@ -226,7 +255,7 @@ public class GameManager {
             @Override
             public void handle(long timestamp) {
 
-                //times each second
+                // Times each second
                 if (timestamp/ 1000000000 != secondUpdate.get()) {
                     timer--;
                     if(timer > 19) {
@@ -235,21 +264,19 @@ public class GameManager {
                     else if(timer <= 0){
                         game.setLevel(game.getLevel() + 1);
                         timer = 30;
-                    }//end if - 30 second wave timer
-                }//end if - second passed
-                removeMonsters();
+                    }
+                }
                 createProjectiles();
                 if(timestamp / 10000000 != fpstimer.get()){
-                    updateLocations((1));
+                    updateLocations();
                 }
                 fpstimer.set(timestamp / 10000000);
                 secondUpdate.set(timestamp / 1000000000);
                 updateLabels(timer);
-            }//end handle
-
+            }
         };
         gameLoop = timer;
         timer.start();
     }
 
-}//end class GameManager
+}
