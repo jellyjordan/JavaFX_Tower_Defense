@@ -104,6 +104,10 @@ public class Tower {
         return projectileList;
     }
 
+    public Coordinate getCoords(){
+        return coords;
+    }
+
     public void setAttackDamage(int attackDamage){
         this.attackDamage = attackDamage;
     }
