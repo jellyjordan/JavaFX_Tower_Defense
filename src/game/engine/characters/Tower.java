@@ -17,9 +17,11 @@ import java.util.ArrayList;
  * to make attacks on.
  */
 public class Tower {
+    private static final int BUILD_TIME = 10000;    // Time used to build tower.
     private int attackDamage;                       // Determines amount of health to reduce from monsters per attack
     private double attackSpeed;                     // Determines the time a tower must wait after an attack
     private int attackRange;                        // Sets the minimum range the tower can make attacks in
+    private int upgradeTime;                        // Time in milliseconds it takes to complete an upgrade.
     private int upgradeCost;                        // Determines the resource cost to upgrade the tower
     private int sellCost;                           // Determines the resources gained by selling the tower
     private ArrayList<Projectile> projectileList;   // Used by the gui thread to create animations for attacks
@@ -43,9 +45,10 @@ public class Tower {
         attackSpeed = 1.0;
         attackRange = 200;
         towerAttacker = new TowerAttackerService(this);
-        towerAttacker.pollTower();
+        towerAttacker.pollTower(BUILD_TIME);
         sellCost = 35;
         upgradeCost = 20;
+        upgradeTime = 5000;
     }
 
     /**
@@ -55,6 +58,8 @@ public class Tower {
         attackDamage++;
         attackSpeed = attackSpeed - 0.1;
         attackRange = attackRange + 50;
+        upgradeTime += 3000;
+        upgradeCost += 20;
     }
 
     /**
