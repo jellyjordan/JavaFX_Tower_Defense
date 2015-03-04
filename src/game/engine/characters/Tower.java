@@ -101,6 +101,10 @@ public class Tower {
         return sellCost;
     }
 
+    public int getUpgradeTime(){
+        return upgradeTime;
+    }
+
     public TowerAttackerService getTowerAttacker() {
         return towerAttacker;
     }
