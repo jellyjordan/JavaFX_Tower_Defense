@@ -43,9 +43,12 @@ public class TowerAttackerService {
     /**
      * Iterates through the monster list to find a target. Once one is found
      * a projectile is created which is used by the main gui thread to create
-     * an animation.
+     *
+     * @param delay
+     * Specifies the delay before the service starts. This is used for creating
+     * upgrade and build times.
      */
-    public void pollTower(){
+    public void pollTower(int delay){
         final Runnable task = new Runnable() {
             @Override
             public void run() {
@@ -72,13 +75,14 @@ public class TowerAttackerService {
                         break;
                     }
                 }
-            }//end Task method - call
+            }
         };//end class runnable
-         pollHandler = scheduler.scheduleWithFixedDelay(task , 0 , 1000 , TimeUnit.MILLISECONDS);
+
+         pollHandler = scheduler.scheduleWithFixedDelay(task , delay , 1000 , TimeUnit.MILLISECONDS);
     }//end method - createTask
 
-    /*
-        Cancels the service for when the tower is upgraded or game is paused
+    /**
+     * Cancels/ends the tower attacker service.
      */
     public void cancel(){
         pollHandler.cancel(true);
