@@ -101,6 +101,40 @@ public class GameManager {
         }
     }
 
+    /**
+     * Gets the tower at a specific coordinate
+     *
+     * @param xCords
+     * The clicked x coordinate passed from the controller
+     * @param yCords
+     * The clicked y coordinate passed from the controller
+     * @return
+     * The tower clicked or null if none exist
+     */
+    public Tower getTower(double xCords , double yCords){
+        Coordinate clickedTiled = new Coordinate(xCords , yCords);
+        // Find tower with matching coordinate
+        for(Tower tower : game.getPlayerTowers()){
+            if(tower.getCoords().equals(clickedTiled)){
+                return tower;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Upgrades a user tower. Pauses the tower attacker service
+     * which is resumed after a set time.
+     *
+     * @param tower
+     * Tower selected for the upgrade.
+     */
+    public void upgradeTower(Tower tower){
+        tower.getTowerAttacker().cancel();
+        tower.upgradeTower();
+        tower.getTowerAttacker().pollTower(tower.getUpgradeTime());
+    }
+
 
     /**
      * Creates a monster.
